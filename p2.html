@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Password Gate</title>
+</head>
+
+<body style="font-family: Arial; text-align: center; padding: 40px; overflow:hidden;">
+
+<h2 id="questionTitle">🔒 Question 1</h2>
+<p id="questionText">When is my birthday? (DD/MM/YYYY)</p>
+
+<input type="password" id="answerInput" placeholder="Answer">
+<br><br>
+
+<button id="enterBtn" onclick="checkAnswer()">Enter</button>
+
+<!-- BUTTON CONTAINER -->
+<div id="buttons" style="
+  margin:30px auto;
+  position:relative;
+  width:250px;
+  height:250px;
+  border:px solid black;
+  overflow:hidden;
+"></div>
+
+<p id="message"></p>
+
+<script>
+let currentQuestion = 0;
+const SKIP_CODE = "pinkypromise";
+
+const questions = [
+  { question: "When is my birthday? (MM/DD/YYYY)", answer: "11/16/2010" },
+  { question: "What is my favorite color?", answer: "Orange" },
+  { question: "Whats my legal first name?", answer: "Srivanth" },
+  { question: "Whats my favourite instrument?", answer: "Piano" },
+  { question: "Who is always right? (Write the first name)", answer: "Rishi" },
+  { question: "What is my mom's name?", answer: "Pratyusha" },
+  { question: "What class do I HATE", answer: "Biology" },
+  { question: "When did we start talking? (MM/DD/YYYY)", answer: "01/10/2026" },
+  { question: "What was the second question?", answer: "What is my favorite color?" },
+  { question: "Who is my valentine?", answer: "" }
+];
+
+function checkAnswer() {
+  const input = document.getElementById("answerInput").value.trim();
+  const msg = document.getElementById("message");
+
+  if (input.toLowerCase() === SKIP_CODE) {
+    startValentineAnimation();
+    return;
+  }
+
+  if (currentQuestion === 9) {
+    startValentineAnimation();
+    return;
+  }
+
+  if (input === questions[currentQuestion].answer) {
+    currentQuestion++;
+    msg.innerText = "✅ Correct!";
+    document.getElementById("answerInput").value = "";
+    document.getElementById("questionTitle").innerText =
+      "🔒 Question " + (currentQuestion + 1);
+    document.getElementById("questionText").innerText =
+      questions[currentQuestion].question;
+  } else {
+    msg.innerText = "❌ Wrong answer";
+  }
+}
+
+/* ===== TYPE & DELETE ===== */
+
+function typeText(el, text, speed, done) {
+  el.textContent = "";
+  let i = 0;
+  const interval = setInterval(() => {
+    el.textContent += text[i] === " " ? "\u00A0" : text[i];
+    i++;
+    if (i === text.length) {
+      clearInterval(interval);
+      if (done) done();
+    }
+  }, speed);
+}
+
+function deleteText(el, speed, done) {
+  let txt = el.textContent;
+  const interval = setInterval(() => {
+    txt = txt.slice(0, -1);
+    el.textContent = txt;
+    if (!txt.length) {
+      clearInterval(interval);
+      if (done) done();
+    }
+  }, speed);
+}
+
+/* ===== VALENTINE SEQUENCE ===== */
+
+function startValentineAnimation() {
+  const q = document.getElementById("questionText");
+  document.getElementById("questionTitle").innerText = "";
+  document.getElementById("enterBtn").style.display = "none";
+  document.getElementById("message").innerText = "";
+
+  const pause = 3000;
+
+  typeText(q, "Who is my valentine?", 50, () => {
+    setTimeout(() => {
+      deleteText(q, 30, () => {
+        typeText(q, "Oh wait.", 50, () => {
+          setTimeout(() => {
+            deleteText(q, 30, () => {
+              typeText(q, "I don't have one.", 50, () => {
+                setTimeout(() => {
+                  deleteText(q, 30, () => {
+                    typeText(q, "Will you be my valentine?", 50, () => {
+                      // Wait 1 second before showing buttons
+                      setTimeout(showButtons, 1000);
+                    });
+                  });
+                }, pause);
+              });
+            });
+          }, pause);
+        });
+      });
+    }, pause);
+  });
+}
+
+/* ===== YES / NO BUTTONS ===== */
+
+function showButtons() {
+  const box = document.getElementById("buttons");
+  box.innerHTML = `
+    <button id="yesBtn">YES</button>
+    <button id="noBtn" style="position:absolute; left:120px; top:120px;">NO</button>
+  `;
+
+  const yesBtn = document.getElementById("yesBtn");
+  const noBtn = document.getElementById("noBtn");
+  const input = document.getElementById("answerInput");
+  const q = document.getElementById("questionText");
+
+  yesBtn.onclick = () => {
+    const name = input.value.trim();
+    q.innerText = name
+      ? `💖 ${name} is officially my valentine 💖`
+      : "💖 You said YES 💖";
+    box.innerHTML = "";
+  };
+
+  // NO button runaway starts 1 second after buttons appear
+  setTimeout(() => {
+    document.addEventListener("mousemove", (e) => {
+      const btnRect = noBtn.getBoundingClientRect();
+
+      const btnX = btnRect.left + btnRect.width / 2;
+      const btnY = btnRect.top + btnRect.height / 2;
+
+      const dx = btnX - e.clientX;
+      const dy = btnY - e.clientY;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+
+      if (dist < 120) {
+        const step = 10;
+
+        let newLeft = noBtn.offsetLeft + (dx/dist)*step;
+        let newTop  = noBtn.offsetTop  + (dy/dist)*step;
+
+        newLeft = Math.max(0, Math.min(250 - noBtn.offsetWidth, newLeft));
+        newTop  = Math.max(0, Math.min(250 - noBtn.offsetHeight, newTop));
+
+        noBtn.style.left = newLeft + "px";
+        noBtn.style.top  = newTop + "px";
+      }
+    });
+  }, 1000); // 1-second delay
+}
+</script>
+
+</body>
+</html>

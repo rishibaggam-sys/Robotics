@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2575.7">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; -webkit-text-stroke: #000000}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; -webkit-text-stroke: #000000; min-height: 14.0px}
+    span.s1 {font-kerning: none}
+  </style>
+</head>
+<body>
+<p class="p1"><span class="s1">&lt;!DOCTYPE html&gt;</span></p>
+<p class="p1"><span class="s1">&lt;html lang="en"&gt;</span></p>
+<p class="p1"><span class="s1">&lt;head&gt;</span></p>
+<p class="p1"><span class="s1">&lt;meta charset="UTF-8"&gt;</span></p>
+<p class="p1"><span class="s1">&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</span></p>
+<p class="p1"><span class="s1">&lt;title&gt;Video Enhancer&lt;/title&gt;</span></p>
+<p class="p1"><span class="s1">&lt;style&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>body { font-family: Arial, sans-serif; padding: 20px; max-width: 700px; margin: auto; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>h1 { font-size: 2em; margin-bottom: 20px; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>input, button { padding: 10px; margin-top: 10px; width: 100%; box-sizing: border-box; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>button { cursor: pointer; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>#progressContainer { width: 100%; background: #eee; border-radius: 5px; overflow: hidden; margin-top: 10px; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>#progressBar { width: 0%; height: 20px; background: #4caf50; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>video { margin-top: 20px; width: 100%; border: 1px solid #ccc; border-radius: 8px; }</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>#saveButton { display: none; margin-top: 10px; padding: 10px; background: #007aff; color: white; border: none; border-radius: 5px; font-size: 16px; }</span></p>
+<p class="p1"><span class="s1">&lt;/style&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/head&gt;</span></p>
+<p class="p1"><span class="s1">&lt;body&gt;</span></p>
+<p class="p1"><span class="s1">&lt;h1&gt;Video Enhancer (Up to 4K)&lt;/h1&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;input type="file" id="videoInput" accept="video/*"&gt;</span></p>
+<p class="p1"><span class="s1">&lt;button id="processBtn"&gt;Enhance Video&lt;/button&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;div id="progressContainer"&gt;&lt;div id="progressBar"&gt;&lt;/div&gt;&lt;/div&gt;</span></p>
+<p class="p1"><span class="s1">&lt;p id="status"&gt;&lt;/p&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;video id="outputVideo" controls style="display:none;"&gt;&lt;/video&gt;</span></p>
+<p class="p1"><span class="s1">&lt;button id="saveButton"&gt;Save This&lt;/button&gt;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1">&lt;script type="module"&gt;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>import { createFFmpeg, fetchFile } from "https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.5/dist/ffmpeg.min.js";</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const ffmpeg = createFFmpeg({ log: true, progress: ({ ratio }) =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>document.getElementById('progressBar').style.width = Math.round(ratio*100) + '%';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>}});</span></p>
+<p class="p2"><span class="s1"><span class="Apple-converted-space">  </span></span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const processBtn = document.getElementById('processBtn');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const videoInput = document.getElementById('videoInput');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const outputVideo = document.getElementById('outputVideo');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const saveButton = document.getElementById('saveButton');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>const status = document.getElementById('status');</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>let processedBlob = null;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>processBtn.addEventListener('click', async () =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const file = videoInput.files[0];</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if (!file) return alert("Please select a video!");</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>status.innerText = "Loading FFmpeg...";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if (!ffmpeg.isLoaded()) await ffmpeg.load();</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>status.innerText = "Processing video...";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const fileName = file.name;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>ffmpeg.FS('writeFile', fileName, await fetchFile(file));</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>// Enhance video (up to 4K resolution)</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>try {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>await ffmpeg.run(</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>'-i', fileName,</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>'-vf', 'scale=min(3840\\,iw):min(2160\\,ih)', // upscale max 4K</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>'-c:v', 'libx264',</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>'-preset', 'fast',</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>'-crf', '23',</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">        </span>'output.mp4'</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>} catch (e) {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>console.error(e);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>status.innerText = "Error processing video. Check console.";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">      </span>return;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>}</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const data = ffmpeg.FS('readFile', 'output.mp4');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>processedBlob = new Blob([data.buffer], { type: 'video/mp4' });</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const videoURL = URL.createObjectURL(processedBlob);</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>outputVideo.src = videoURL;</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>outputVideo.style.display = 'block';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>saveButton.style.display = 'inline-block';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>status.innerText = "Video ready!";</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>});</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>saveButton.addEventListener('click', () =&gt; {</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>if (!processedBlob) return;</span></p>
+<p class="p2"><span class="s1"></span><br></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>const a = document.createElement('a');</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>a.href = URL.createObjectURL(processedBlob);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>a.download = 'enhanced_video.mp4';</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>document.body.appendChild(a);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>a.click();</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">    </span>document.body.removeChild(a);</span></p>
+<p class="p1"><span class="s1"><span class="Apple-converted-space">  </span>});</span></p>
+<p class="p1"><span class="s1">&lt;/script&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/body&gt;</span></p>
+<p class="p1"><span class="s1">&lt;/html&gt;</span></p>
+</body>
+</html>
